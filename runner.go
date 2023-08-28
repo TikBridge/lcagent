@@ -388,7 +388,6 @@ func (a *runner) start(ctx *cli.Context) (errr error) {
 			}
 		}
 
-		log.Infof("config: %+v", a.conf)
 		log.Infof("%s STARTED", a.String())
 		return nil
 	} else {
@@ -455,6 +454,7 @@ func (a *runner) run(cctx *cli.Context) error {
 	defer func() {
 		_ = a.close(cctx)
 	}()
+	log.Infof("config: %+v", a.conf)
 	if err := a.start(cctx); err != nil {
 		return err
 	}
