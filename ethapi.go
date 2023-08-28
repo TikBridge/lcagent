@@ -109,24 +109,26 @@ func (c *EthClient) _check() error {
 	return nil
 }
 
-func (c *EthClient) nonceWithBalanceMoreThan(ctx context.Context, addr common.Address, levels ...*big.Int) (uint64, error) {
+func (c *EthClient) nonceWithBalanceMoreThan(ctx context.Context, addr common.Address, checkBalance bool, levels ...*big.Int) (uint64, error) {
 	if err := c._check(); err != nil {
 		return 0, err
 	}
 	acc := T2E.Address(addr)
 	cctx, cancel := context.WithTimeout(ctx, reqTimeOut*2)
 	defer cancel()
-	balance, err := c.Client.PendingBalanceAt(cctx, acc)
-	if err != nil {
-		return 0, err
-	}
-	var level *big.Int
-	if len(levels) > 0 {
-		level = levels[0]
-	}
-	bl := (*math.BigInt)(level).MustInt()
-	if (*math.BigInt)(balance).CompareInt(bl) <= 0 {
-		return 0, fmt.Errorf("balance of %x is less than %s", addr[:], math.BigIntForPrint(bl))
+	if checkBalance {
+		balance, err := c.Client.PendingBalanceAt(cctx, acc)
+		if err != nil {
+			return 0, err
+		}
+		var level *big.Int
+		if len(levels) > 0 {
+			level = levels[0]
+		}
+		bl := (*math.BigInt)(level).MustInt()
+		if (*math.BigInt)(balance).CompareInt(bl) <= 0 {
+			return 0, fmt.Errorf("balance of %x is less than %s", addr[:], math.BigIntForPrint(bl))
+		}
 	}
 	return c.Client.PendingNonceAt(cctx, acc)
 }

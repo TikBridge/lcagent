@@ -278,7 +278,7 @@ func (n *syncer) _mcsProofs(cctx *cli.Context, txProofs []*models.TxFinalProof) 
 	_ = dlocks.Refresh(cctx.Context)
 	to := n.conf.Synchronizer.TargetMSCAddr
 	gas, mustHave := n._targetSuggestBalance(cctx.Context)
-	nonce, err := n.target.nonceWithBalanceMoreThan(cctx.Context, n.targetPriv.Address(), mustHave)
+	nonce, err := n.target.nonceWithBalanceMoreThan(cctx.Context, n.targetPriv.Address(), n.conf.TargetCheckBalance, mustHave)
 	if err != nil {
 		return err
 	}

@@ -298,7 +298,7 @@ func (u *updater) _updateCommittee(ctx context.Context, epoch common.EpochNum, c
 		_ = u.sendingLock.Release()
 	}()
 	gas, mustHave := u._targetSuggestBalance(ctx)
-	nonce, err := u.target.nonceWithBalanceMoreThan(ctx, u.targetPriv.Address(), mustHave)
+	nonce, err := u.target.nonceWithBalanceMoreThan(ctx, u.targetPriv.Address(), u.conf.TargetCheckBalance, mustHave)
 	if err != nil {
 		return fmt.Errorf("get nonce of %x failed: %w", u.targetPriv.Address().Bytes(), err)
 	}

@@ -213,6 +213,7 @@ func (a *runner) prepareConfig(ctx *cli.Context) error {
 		TargetRetryInterval: ctx.Int64(_retryIntervalFlag.Name),
 		TargetIsTKM:         ctx.Bool(_targetIsTKM.Name),
 		TargetGPTTL:         int64(ctx.Uint64(_targetGPTTL.Name)),
+		TargetCheckBalance:  ctx.Bool(_targetCheckBalance.Name),
 		SrcStartHeight:      ctx.Uint64(_startHeightFlag.Name),
 	}
 	if cid := ctx.Uint64(_targetChainIDFlag.Name); cid > 0 {

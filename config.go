@@ -38,6 +38,7 @@ type (
 		TargetRetryInterval int64          // retry to fetch receipt from target chain, in seconds
 		TargetIsTKM         bool           // target chain is a Thinkium chain (for testing)
 		TargetGPTTL         int64          // in seconds
+		TargetCheckBalance  bool           // whether to check the balance in target
 		Maintainer          Maintain
 		Synchronizer        Synchronize
 		Updater             Update
@@ -254,6 +255,13 @@ var (
 		Value:    60 * 10,
 	})
 
+	_targetCheckBalance = altsrc.NewBoolFlag(&cli.BoolFlag{
+		Name:     "target.checkbalance",
+		Category: TargetCategory,
+		Usage:    "whether to check the balance of sender before sending tx",
+		Value:    true,
+	})
+
 	_startHeightFlag = altsrc.NewUint64Flag(&cli.Uint64Flag{
 		Name:     "src.start",
 		Category: SourceCategory,
@@ -396,6 +404,7 @@ var (
 		_targetPEMPwdFlag,
 		_targetIsTKM,
 		_targetGPTTL,
+		_targetCheckBalance,
 		_startHeightFlag,
 		_retryIntervalFlag,
 		_logFileFlag,

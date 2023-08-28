@@ -166,7 +166,7 @@ func (a *maintainer) _targetUpdateComm(cctx *cli.Context, comm *CommitteeProof) 
 	// 	return fmt.Errorf("estimate failed: %w", err)
 	// }
 	gas, mustHave := a._targetSuggestBalance(cctx.Context)
-	nonce, err := a.target.nonceWithBalanceMoreThan(cctx.Context, a.targetPriv.Address(), mustHave)
+	nonce, err := a.target.nonceWithBalanceMoreThan(cctx.Context, a.targetPriv.Address(), a.conf.TargetCheckBalance, mustHave)
 	if err != nil {
 		return err
 	}
