@@ -33,8 +33,9 @@ import (
 )
 
 const (
-	defaultGas = 10000000
-	timeFormat = "2006-01-02 15:04:05"
+	defaultGas     = 10000000
+	timeFormat     = "2006-01-02 15:04:05"
+	ignoresNBlocks = 100
 )
 
 func mustInitAbi(name, abiString string) abi.ABI {
@@ -157,4 +158,15 @@ func locateLog(logs models.Logs, contractAddr common.Address, topicId common.Has
 		}
 	}
 	return -1, nil
+}
+
+func shouldIgnoreHeight(height common.Height) (nextStart common.Height, ignored bool) {
+	if height.IsNil() {
+		return 0, true
+	}
+	nextStart = height.EpochNum().LastHeight() - ignoresNBlocks
+	if nextStart.Compare(height) > 0 {
+		return nextStart, true
+	}
+	return height, false
 }

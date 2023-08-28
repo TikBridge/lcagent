@@ -32,6 +32,7 @@ type (
 		SrcRpcAddr          string         // no default (ip:port)
 		SrcChainId          common.ChainID // 0 for maintainer
 		SrcStartHeight      uint64         // start height
+		SrcIgnoreBlocks     bool           // ignore blocks where its BlockNum<(EpochLength-100) in maintaining
 		TargetName          string         // the unique name
 		TargetApiAddr       string         // target chain eth_api address, no default (ip:addr)
 		TargetChainID       *big.Int       // target chain id
@@ -204,6 +205,19 @@ var (
 		Usage:    "set common.BlocksInEpoch if `BlocksInEpoch`>0",
 	})
 
+	_startHeightFlag = altsrc.NewUint64Flag(&cli.Uint64Flag{
+		Name:     "src.start",
+		Category: SourceCategory,
+		Usage:    "starting height of source chain",
+	})
+
+	_srcIgnoreBlocks = altsrc.NewBoolFlag(&cli.BoolFlag{
+		Name:     "src.ignoreblocks",
+		Category: SourceCategory,
+		Usage:    "whether ignoring blocks where their BlockNum<(EpochLength-100) in maintaining",
+		Value:    false,
+	})
+
 	_targetNameFlag = altsrc.NewStringFlag(&cli.StringFlag{
 		Name:     "target.name",
 		Category: TargetCategory,
@@ -260,12 +274,6 @@ var (
 		Category: TargetCategory,
 		Usage:    "whether to check the balance of sender before sending tx",
 		Value:    true,
-	})
-
-	_startHeightFlag = altsrc.NewUint64Flag(&cli.Uint64Flag{
-		Name:     "src.start",
-		Category: SourceCategory,
-		Usage:    "starting height of source chain",
 	})
 
 	_maintainTargetLCFlag = altsrc.NewStringFlag(&cli.StringFlag{
@@ -396,6 +404,8 @@ var (
 		_srcChainFlag,
 		_srcBaseChainIDFlag,
 		_srcBlocksInEpochFlag,
+		_startHeightFlag,
+		_srcIgnoreBlocks,
 		_targetNameFlag,
 		_targetApiFlag,
 		_targetChainIDFlag,
@@ -405,7 +415,6 @@ var (
 		_targetIsTKM,
 		_targetGPTTL,
 		_targetCheckBalance,
-		_startHeightFlag,
 		_retryIntervalFlag,
 		_logFileFlag,
 		_checkLNCommFlag,

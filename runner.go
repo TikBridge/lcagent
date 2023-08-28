@@ -215,6 +215,7 @@ func (a *runner) prepareConfig(ctx *cli.Context) error {
 		TargetGPTTL:         int64(ctx.Uint64(_targetGPTTL.Name)),
 		TargetCheckBalance:  ctx.Bool(_targetCheckBalance.Name),
 		SrcStartHeight:      ctx.Uint64(_startHeightFlag.Name),
+		SrcIgnoreBlocks:     ctx.Bool(_srcIgnoreBlocks.Name),
 	}
 	if cid := ctx.Uint64(_targetChainIDFlag.Name); cid > 0 {
 		conf.TargetChainID = new(big.Int).SetUint64(cid)
@@ -432,15 +433,16 @@ func (a *runner) run(cctx *cli.Context) error {
 	// set common.BlocksInEpoch
 	if blocksInEpoch := cctx.Uint64(_srcBlocksInEpochFlag.Name); blocksInEpoch > 0 {
 		common.BlocksInEpoch = blocksInEpoch
-		log.Warnf("common.BlocksInEpoch = %d", common.BlocksInEpoch)
+		// log.Warnf("common.BlocksInEpoch = %d", common.BlocksInEpoch)
 		log.SetFields(logrus.Fields{"Blocks": common.BlocksInEpoch})
 	}
 	// set common.BigChainIDBase if needed
 	if baseChainID := cctx.Uint64(_srcBaseChainIDFlag.Name); baseChainID > 0 {
 		common.BigChainIDBase = baseChainID
-		log.Warnf("common.BigChainIDBase = %d", baseChainID)
+		// log.Warnf("common.BigChainIDBase = %d", baseChainID)
 		log.SetFields(logrus.Fields{"Base": common.BigChainIDBase})
 	}
+	log.Infof("common.BlocksInEpoch: %d, common.BigChainIDBase: %d", common.BlocksInEpoch, common.BigChainIDBase)
 
 	if a.bHandler != nil {
 		if err := a.bHandler.prepareConfig(cctx); err != nil {
@@ -467,6 +469,12 @@ func (a *runner) run(cctx *cli.Context) error {
 	} else {
 		return cli.Exit(errors.New("basic handler is missing"), ExitBasicHandlerErr)
 	}
+}
+
+func (a *runner) _srcStats(cctx *cli.Context) (*models.ChainStats, error) {
+	ctx, cancel := context.WithTimeout(cctx.Context, reqTimeOut)
+	defer cancel()
+	return a.src.ChainStats(ctx)
 }
 
 type looperHandler interface {
