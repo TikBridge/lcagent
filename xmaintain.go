@@ -119,6 +119,29 @@ func (a *xmaintainer) confirmConfig(ctx *cli.Context) error {
 	return nil
 }
 
+func (a *xmaintainer) prepareToGet(cctx *cli.Context, start common.Height) error {
+	if a.conf.SrcIgnoreBlocks {
+		if nextStart, shouldIgnore := shouldIgnoreHeight(start); shouldIgnore {
+			stats, err := a._srcStats(cctx)
+			if err != nil || stats == nil {
+				log.Warnf("pass ignoring, source stats failed: %v", err)
+				return nil
+			}
+			currentHeight := common.Height(stats.CurrentHeight)
+			updatedHeight := currentHeight
+			if currentHeight.Compare(nextStart) >= 0 {
+				updatedHeight = nextStart
+			}
+			if err := a.updateStartHeight(cctx, updatedHeight); err != nil {
+				log.Warnf("update start height failed: %v", err)
+			}
+			return NotUnlockError(fmt.Errorf("nextStart:%s currentHeight:%s, start height updated to %s",
+				&nextStart, &currentHeight, &updatedHeight))
+		}
+	}
+	return nil
+}
+
 func (a *xmaintainer) _getSyncingEpoch(cctx *cli.Context) (common.EpochNum, error) {
 	ctx, cancel := context.WithTimeout(cctx.Context, redisTimeout)
 	defer cancel()
