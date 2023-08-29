@@ -493,21 +493,6 @@ func (a *looper) Name() string {
 	return fmt.Sprintf("LOOPER_%s", a.conf.TargetName)
 }
 
-//
-// func (a *looper) prepareConfig(ctx *cli.Context) error {
-// 	if err := a.runner.prepareConfig(ctx); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-//
-// func (a *looper) confirmConfig(ctx *cli.Context) error {
-// 	if err := a.runner.confirmConfig(ctx); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func (a *looper) doWork(ctx *cli.Context) error {
 	interval := time.Second * a.getFetchInterval()
 	timer := time.NewTimer(interval)
@@ -529,11 +514,9 @@ func (a *looper) doWork(ctx *cli.Context) error {
 					} else {
 						var unlockErr LockError
 						if errors.As(err, &unlockErr) && !unlockErr.Unlock() {
-							log.Warnf("iterate blocks failed and not release locks: %v", err)
+							log.Warnf("iterate failed [NR]: %v", err)
 						} else {
-							log.Errorf("iterate blocks failed and release locks: %v", err)
-							// error occurred, release the locks so that other processes can take over
-							// or waiting for connection reconnect
+							log.Errorf("iterate failed [RELEASED]: %v", err)
 							_ = a.runningLock.Release()
 							_ = a.sendingLock.Release()
 						}
