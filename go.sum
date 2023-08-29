@@ -7,8 +7,8 @@ github.com/ThinkiumGroup/go-cipher v1.1.1 h1:4wfiK6A45HnU4pTCuJsiSoPVnAO/9dEomAV
 github.com/ThinkiumGroup/go-common v1.7.0 h1:ATlp/Wzv1dib1AFylFZAbdtKJFwvzWD2jitICIeXlrA=
 github.com/ThinkiumGroup/go-common v1.7.0/go.mod h1:Ce5fEXE3U3U6SX7u1dEUmB1mvoO7Fvb5U541gGhTueU=
 github.com/ThinkiumGroup/go-ecrypto v1.3.0 h1:ZEs4gmfV6v2BP9bYVJKJ06CqVbSHsvaH2aA000DTixQ=
-github.com/ThinkiumGroup/go-tkmrpc v0.5.0 h1:D70GstkZvK5oNnmIvZNSg5ESjm8sh/Flt/dgl3RYLDo=
-github.com/ThinkiumGroup/go-tkmrpc v0.5.0/go.mod h1:3I3HM/6IU+zNaNvPw2NVb7yXuYRqmYEjquwWpEsfzZc=
+github.com/ThinkiumGroup/go-tkmrpc v0.5.1 h1:eTXC0Rx5ZsH7upfvYMsYP4dPfTdVTyfWe4iUheV1SWE=
+github.com/ThinkiumGroup/go-tkmrpc v0.5.1/go.mod h1:3I3HM/6IU+zNaNvPw2NVb7yXuYRqmYEjquwWpEsfzZc=
 github.com/VictoriaMetrics/fastcache v1.6.0 h1:C/3Oi3EiBCqufydp1neRZkqcwmEiuRT9c3fqvvgKm5o=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/bsm/ginkgo/v2 v2.7.0 h1:ItPMPH90RbmZJt5GtkcNvIRuGEdwlBItdNVoyzaNQao=
