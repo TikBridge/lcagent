@@ -453,6 +453,6 @@ func (n *syncer) _maxProvableHeights(ctx context.Context) (main, sub common.Heig
 		sub:  maxSub,
 	}
 	n.maxProvableHeights.Update(max)
-	log.Warnf("provable height cache put: %s", max)
+	log.Debugf("provable height cache put: %s", max)
 	return maxMain, maxSub, nil
 }

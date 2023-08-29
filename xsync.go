@@ -145,7 +145,7 @@ func (n *xsyncer) _maxProvableHeight(ctx context.Context) (common.Height, error)
 		return common.NilHeight, err
 	}
 	n.maxProvableHeight.Update(&maxValidatableHeight)
-	log.Warnf("provable height cache put: %s", &maxValidatableHeight)
+	log.Debugf("provable height cache put: %s", &maxValidatableHeight)
 	return maxValidatableHeight, nil
 }
 
