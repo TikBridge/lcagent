@@ -834,7 +834,7 @@ const (
 )
 
 func initRelayLNAbi() {
-	XLightNodeAbi = mustInitAbi("relay chain light node", xLightNodeString)
+	XLightNodeAbi = *abi.MustInitAbi("relay chain light node", xLightNodeString)
 }
 
 type XCommProof struct {

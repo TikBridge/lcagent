@@ -17,20 +17,5 @@ package main
 import "testing"
 
 func TestUpdatableLNABI(t *testing.T) {
-	ab := UpdatableLightNodeAbi
-	t.Log(ab.Constructor)
-	t.Log("events")
-	for n, e := range ab.Events {
-		t.Log(n, "=>", e)
-	}
-	t.Log("methods")
-	for n, e := range ab.Methods {
-		t.Log(n, "=>", e)
-	}
-	t.Log("errors")
-	for n, e := range ab.Errors {
-		t.Log(n, "=>", e)
-	}
-	t.Log(ab.Fallback)
-	t.Log(ab.Receive)
+	_testShowAbi(t, UpdatableLightNodeAbi)
 }

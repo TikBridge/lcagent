@@ -1989,8 +1989,8 @@ const (
 )
 
 func initMCSAbis() {
-	MCSAbi = mustInitAbi("MCS", McsAbi)
-	MCSRelayAbi = mustInitAbi("MCS Relay", McsRelayAbi)
+	MCSAbi = *abi.MustInitAbi("MCS", McsAbi)
+	MCSRelayAbi = *abi.MustInitAbi("MCS Relay", McsRelayAbi)
 }
 
 type MapTransferOutLog struct {

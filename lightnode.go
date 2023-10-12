@@ -1226,7 +1226,7 @@ const (
 )
 
 func initTKMLNAbi() {
-	LightNodeABI = mustInitAbi("tkm light node", tkmlcstring)
+	LightNodeABI = *abi.MustInitAbi("tkm light node", tkmlcstring)
 }
 
 type (

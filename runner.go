@@ -41,9 +41,9 @@ import (
 )
 
 const (
-	redisTimeout   = 1 * time.Second
-	runningLockTTL = 30 * time.Second
-	sendingLockTTL = 30 * time.Second
+	redisTimeout = 1 * time.Second
+	// runningLockTTL = 30 * time.Second
+	// sendingLockTTL = 30 * time.Second
 
 	senderLockPrefix = "targetSender"
 )
@@ -71,23 +71,27 @@ func (f *BitFlags) Bool(bit int) bool {
 	return (*big.Int)(f).Bit(bit) == 1
 }
 
-func (f *BitFlags) Set(bit int) *BitFlags {
+func (f *BitFlags) Set(bits ...int) *BitFlags {
 	var i *big.Int
 	if f != nil {
 		i = (*big.Int)(f)
 	} else {
 		i = big.NewInt(0)
 	}
-	i.SetBit(i, bit, 1)
+	for _, bit := range bits {
+		i.SetBit(i, bit, 1)
+	}
 	return (*BitFlags)(i)
 }
 
-func (f *BitFlags) Clear(bit int) *BitFlags {
+func (f *BitFlags) Clear(bits ...int) *BitFlags {
 	if f == nil {
 		return f
 	}
 	i := (*big.Int)(f)
-	i.SetBit(i, bit, 0)
+	for _, bit := range bits {
+		i.SetBit(i, bit, 0)
+	}
 	return f
 }
 
@@ -205,6 +209,8 @@ func (a *runner) prepareConfig(ctx *cli.Context) error {
 	log.Infof("target.sender: 0x%x", sender.Address().Bytes())
 	conf := &Config{
 		RedisAddr:           ctx.String(_redisFlag.Name),
+		RunningLockTTL:      ctx.Int64(_ttlRunningLcokFlag.Name),
+		SendingLockTTL:      ctx.Int64(_ttlSendingLockFlag.Name),
 		SrcFetchInterval:    ctx.Int64(_intervalFlag.Name),
 		SrcRpcAddr:          ctx.String(_srcRpcFlag.Name),
 		SrcChainId:          common.ChainID(ctx.Uint64(_srcChainFlag.Name)),
@@ -229,10 +235,7 @@ func (a *runner) prepareConfig(ctx *cli.Context) error {
 	a.keys.runnerLockKey = fmt.Sprintf("%s_lock_%d", strings.ToLower(a.Name()), conf.SrcChainId)
 	a.keys.runnerLockValue = a._runnerLockValue()
 	a.keys.senderLockKey = fmt.Sprintf("%s_%d_0x%x", senderLockPrefix, a.conf.TargetChainID, a.targetPriv.Address().Bytes())
-	a.needs = a.needs.Set(NeedSource)
-	a.needs = a.needs.Set(NeedTarget)
-	a.needs = a.needs.Set(NeedRedis)
-	a.needs = a.needs.Set(NeedRunningLock)
+	a.needs = a.needs.Set(NeedSource, NeedTarget, NeedRedis, NeedRunningLock)
 
 	return nil
 }
@@ -372,8 +375,8 @@ func (a *runner) start(ctx *cli.Context) (errr error) {
 			rds := redis.NewClient(opts)
 			a.redis = rds
 			locker := redislock.New(a.redis)
-			a.runningLock = newRedisLock(a.redis, locker, a.keys.runnerLockKey, a.keys.runnerLockValue, runningLockTTL)
-			a.sendingLock = newRedisLock(a.redis, locker, a.keys.senderLockKey, a.keys.runnerLockValue, sendingLockTTL)
+			a.runningLock = newRedisLock(a.redis, locker, a.keys.runnerLockKey, a.keys.runnerLockValue, time.Duration(a.conf.RunningLockTTL)*time.Second)
+			a.sendingLock = newRedisLock(a.redis, locker, a.keys.senderLockKey, a.keys.runnerLockValue, time.Duration(a.conf.SendingLockTTL)*time.Second)
 		} else {
 			a.redis = nil
 			a.runningLock = nil

@@ -16,7 +16,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -26,7 +25,6 @@ import (
 	"time"
 
 	"github.com/ThinkiumGroup/go-common"
-	"github.com/ThinkiumGroup/go-common/abi"
 	"github.com/ThinkiumGroup/go-tkmrpc/client"
 	"github.com/ThinkiumGroup/go-tkmrpc/models"
 	"golang.org/x/term"
@@ -37,14 +35,6 @@ const (
 	timeFormat     = "2006-01-02 15:04:05"
 	ignoresNBlocks = 100
 )
-
-func mustInitAbi(name, abiString string) abi.ABI {
-	a, err := abi.JSON(bytes.NewReader([]byte(abiString)))
-	if err != nil {
-		panic(fmt.Errorf("read %s abi failed: %w", name, err))
-	}
-	return a
-}
 
 func localip() (string, error) {
 	addrs, err := net.InterfaceAddrs()

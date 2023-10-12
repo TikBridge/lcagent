@@ -837,5 +837,5 @@ const (
 )
 
 func initUpdatableLNAbi() {
-	UpdatableLightNodeAbi = mustInitAbi("updatable light node", tkmUpdateLcString)
+	UpdatableLightNodeAbi = *abi.MustInitAbi("updatable light node", tkmUpdateLcString)
 }

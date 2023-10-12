@@ -99,9 +99,7 @@ func (u *updater) prepareConfig(ctx *cli.Context) error {
 		return err
 	}
 	if ctx.Uint64(_updaterPostponeFlag.Name) > 0 {
-		u.needs = u.needs.Clear(NeedSource)
-		u.needs = u.needs.Clear(NeedTarget)
-		u.needs = u.needs.Clear(NeedRunningLock)
+		u.needs = u.needs.Clear(NeedSource, NeedTarget, NeedRunningLock)
 	}
 	u.keys.runnerLockKey = fmt.Sprintf("%s_lock_%d", strings.ToLower(u.Name()), u.conf.SrcChainId)
 	u.lastUpdateTimeKey = fmt.Sprintf("%s_lastTimeStamp_%d", strings.ToLower(u.Name()), u.conf.SrcChainId)

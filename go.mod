@@ -3,7 +3,7 @@ module lcagent
 go 1.18
 
 require (
-	github.com/ThinkiumGroup/go-common v1.7.0
+	github.com/ThinkiumGroup/go-common v1.7.1
 	github.com/ThinkiumGroup/go-tkmrpc v0.5.1
 	github.com/bsm/redislock v0.9.3
 	github.com/ethereum/go-ethereum v1.12.0
@@ -13,6 +13,7 @@ require (
 	github.com/stephenfire/pkcs8 v0.0.2
 	github.com/urfave/cli/v2 v2.25.7
 	golang.org/x/crypto v0.10.0
+	golang.org/x/exp v0.0.0-20230206171751-46f607a40771
 	golang.org/x/term v0.9.0
 )
 

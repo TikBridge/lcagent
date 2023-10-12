@@ -258,10 +258,12 @@ func (et Eth2TKM) TxReceipt(ethtx *types.Transaction, ethrpt *types.Receipt, tkm
 	}
 	var tx *models.Transaction
 	var err error
-	if len(tkmChainTx) > 0 && tkmChainTx[0] {
-		tx, err = et.Tx(ethtx)
-	} else {
-		tx, err = et.TxSameChainID(ethtx)
+	if ethtx != nil {
+		if len(tkmChainTx) > 0 && tkmChainTx[0] {
+			tx, err = et.Tx(ethtx)
+		} else {
+			tx, err = et.TxSameChainID(ethtx)
+		}
 	}
 	if err != nil {
 		return nil, err

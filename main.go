@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	version common.Version = 1002001
+	version common.Version = 1002002
 )
 
 func main() {

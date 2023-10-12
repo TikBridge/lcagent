@@ -16,7 +16,12 @@ package main
 
 import (
 	"encoding/hex"
+	"sort"
+	"strings"
 	"testing"
+
+	"github.com/ThinkiumGroup/go-common/abi"
+	"golang.org/x/exp/maps"
 )
 
 func TestMain(m *testing.M) {
@@ -27,22 +32,37 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
+func _iterateStringMaps[M map[string]V, V any](m M, callback func(V)) {
+	ret := maps.Keys(m)
+	sort.Slice(ret, func(i, j int) bool {
+		return strings.Compare(ret[i], ret[j]) < 0
+	})
+	for _, n := range ret {
+		e := m[n]
+		callback(e)
+	}
+}
+
+func _testShowAbi(t *testing.T, ab abi.ABI) {
+	t.Log(ab.Constructor)
+	t.Log("events:")
+	_iterateStringMaps(ab.Events, func(e abi.Event) {
+		t.Logf("(%x) %s", e.ID[:], e)
+	})
+	t.Log("methods:")
+	_iterateStringMaps(ab.Methods, func(e abi.Method) {
+		t.Logf("(%x) %s", e.ID, e)
+	})
+	t.Log("errors:")
+	_iterateStringMaps(ab.Errors, func(e abi.Error) {
+		t.Logf("(%x) %s", e.ID[:], e.String())
+	})
+	t.Log("Fallback: ", ab.Fallback)
+	t.Log("Receive: ", ab.Receive)
+}
+
 func TestLNABI(t *testing.T) {
-	t.Log(LightNodeABI.Constructor)
-	t.Log("events")
-	for n, e := range LightNodeABI.Events {
-		t.Log(n, "=>", e)
-	}
-	t.Log("methods")
-	for n, e := range LightNodeABI.Methods {
-		t.Log(n, "=>", e)
-	}
-	t.Log("errors")
-	for n, e := range LightNodeABI.Errors {
-		t.Log(n, "=>", e)
-	}
-	t.Log(LightNodeABI.Fallback)
-	t.Log(LightNodeABI.Receive)
+	_testShowAbi(t, LightNodeABI)
 }
 
 func TestUpdateComm(t *testing.T) {

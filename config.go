@@ -28,6 +28,8 @@ import (
 type (
 	Config struct {
 		RedisAddr           string         // default redis://@127.0.0.1:6379/0
+		RunningLockTTL      int64          // TTL for running lock key in redis (seconds)
+		SendingLockTTL      int64          // TTL for sending lock key in redis (seconds)
 		SrcFetchInterval    int64          // in seconds
 		SrcRpcAddr          string         // no default (ip:port)
 		SrcChainId          common.ChainID // 0 for maintainer
@@ -38,7 +40,7 @@ type (
 		TargetChainID       *big.Int       // target chain id
 		TargetRetryInterval int64          // retry to fetch receipt from target chain, in seconds
 		TargetIsTKM         bool           // target chain is a Thinkium chain (for testing)
-		TargetGPTTL         int64          // in seconds
+		TargetGPTTL         int64          // TTL of gasprice cache for target chain in seconds
 		TargetCheckBalance  bool           // whether to check the balance in target
 		Maintainer          Maintain
 		Synchronizer        Synchronize
@@ -150,6 +152,20 @@ var (
 		Category: BasicCategory,
 		Usage:    "redis server address",
 		Value:    "redis://@127.0.0.1:6379/0",
+	})
+
+	_ttlRunningLcokFlag = altsrc.NewInt64Flag(&cli.Int64Flag{
+		Name:     "runningLockTTL",
+		Category: BasicCategory,
+		Usage:    "TTL of agent running lock key in redis (seconds)",
+		Value:    30,
+	})
+
+	_ttlSendingLockFlag = altsrc.NewInt64Flag(&cli.Int64Flag{
+		Name:     "sendingLockTTL",
+		Category: BasicCategory,
+		Usage:    "TTL of agent sending lock key in redis (seconds)",
+		Value:    30,
 	})
 
 	_intervalFlag = altsrc.NewIntFlag(&cli.IntFlag{
@@ -399,6 +415,8 @@ var (
 	_allFlags = []cli.Flag{
 		_confFileFlag,
 		_redisFlag,
+		_ttlRunningLcokFlag,
+		_ttlSendingLockFlag,
 		_intervalFlag,
 		_srcRpcFlag,
 		_srcChainFlag,
