@@ -32,14 +32,14 @@ import (
 )
 
 const (
-	version common.Version = 1002002
+	version common.Version = 1002003
 )
 
 func main() {
 	app := &cli.App{
 		Usage:     "maintain light-node or mcs on ethereum-like chains",
 		Version:   version.String(),
-		Copyright: "Copyright 2023 Thinkium",
+		Copyright: "Copyright 2023 TikBridge",
 		Commands: []*cli.Command{
 			{
 				Name:     "maintain",

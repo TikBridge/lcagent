@@ -170,6 +170,21 @@ func (a *xmaintainer) processBlock(cctx *cli.Context, block *models.BlockEMessag
 			return nil, fmt.Errorf("no available committee found: Next:%s Real:%s",
 				block.BlockBody.NextCommittee, block.BlockBody.NextRealCommittee)
 		}
+
+		// check if the new comm has been already maintained
+		// lastEpoch in LightNode must be the epoch of current block (which packing committee of next epoch)
+		if lastEpochInLN, err := a._lastEpochInLN(cctx); err == nil {
+			blockEpoch := block.BlockHeader.Height.EpochNum()
+			if lastEpochInLN > blockEpoch {
+				log.Warnf("endsEpoch in LightNode is %d, Block%s ignored", lastEpochInLN, block)
+				return nil, nil
+			} else if lastEpochInLN < blockEpoch {
+				return cli.Exit(fmt.Errorf("invalid Epoch of Block%s, where endsEpoch in LightNode is %d", block, lastEpochInLN), ExitByInput), nil
+			}
+		} else {
+			log.Warnf("[IGNORING] get last epoch in LightNode failed: %v", err)
+		}
+
 		syncEpoch, err := a._getSyncingEpoch(cctx)
 		if err != nil {
 			log.Warnf("get Syncing Epoch of XSYNC:%s failed: %v", a.syncStartHeightKey, err)
@@ -271,6 +286,33 @@ func (a *xmaintainer) _parseLNUpdateEvent(l *models.Log) (*updateEvent, error) {
 }
 
 func (a *xmaintainer) _checkLatestComm(ctx *cli.Context) error {
+	lastEpoch, err := a._lastEpochInLN(ctx)
+	if err != nil {
+		return err
+	}
+
+	commAddrs, err := a._commAtEpochInLN(ctx, lastEpoch)
+	if err != nil {
+		return err
+	}
+
+	srcComm, err := getSourceCommOfEpoch(ctx.Context, a.src, lastEpoch)
+	if err != nil {
+		return fmt.Errorf("src.Committee(epoch:%d) failed: %w", lastEpoch, err)
+	}
+
+	to := a.conf.XMaintainer.TargetLCAddr
+	if !committeeEquals(srcComm, commAddrs) {
+		return fmt.Errorf("target.0x%x.%s[1]=epoch:%d addrs(%s) not match with %s",
+			to[:], xEndsOfEpochName, lastEpoch, commAddrs, srcComm)
+	}
+
+	log.Infof("target.0x%x.%s[1]=epoch:%d\naddrs:%s matchs:%s",
+		to[:], xEndsOfEpochName, lastEpoch, common.IndentLevel(0).InfoString(commAddrs), srcComm.InfoString(0))
+	return nil
+}
+
+func (a *xmaintainer) _lastEpochInLN(ctx *cli.Context) (common.EpochNum, error) {
 	from := a.targetPriv.Address()
 	to := a.conf.XMaintainer.TargetLCAddr
 
@@ -278,34 +320,28 @@ func (a *xmaintainer) _checkLatestComm(ctx *cli.Context) error {
 	endsEpochObj.Epoch = uint64(common.NilEpoch)
 	if err := a.target.getter(ctx.Context, from, &to,
 		XLightNodeAbi.Methods[xEndsOfEpochName], endsEpochObj, big.NewInt(1)); err != nil {
-		return fmt.Errorf("target.0x%x.%s[1] failed: %w", to[:], xEndsOfEpochName, err)
+		return common.NilEpoch, fmt.Errorf("target.0x%x.%s[1] failed: %w", to[:], xEndsOfEpochName, err)
 	}
-	if common.EpochNum(endsEpochObj.Epoch).IsNil() {
-		return fmt.Errorf("target.0x%x last epoch not found", to[:])
+	epoch := common.EpochNum(endsEpochObj.Epoch)
+	if epoch.IsNil() {
+		return common.NilEpoch, fmt.Errorf("target.0x%x last epoch not found", to[:])
 	}
+	return epoch, nil
+}
+
+func (a *xmaintainer) _commAtEpochInLN(ctx *cli.Context, epoch common.EpochNum) ([]common.Address, error) {
+	from := a.targetPriv.Address()
+	to := a.conf.XMaintainer.TargetLCAddr
 
 	commObj := new(struct{ Comms []common.Address })
 	if err := a.target.getter(ctx.Context, from, &to,
-		XLightNodeAbi.Methods[xCheckEpochCommName], commObj, endsEpochObj.Epoch); err != nil {
-		return fmt.Errorf("target.0x%x.%s[1] -> %s(epoch:%d) failed: %w",
-			to[:], xEndsOfEpochName, xCheckEpochCommName, endsEpochObj.Epoch, err)
+		XLightNodeAbi.Methods[xCheckEpochCommName], commObj, uint64(epoch)); err != nil {
+		return nil, fmt.Errorf("target.0x%x.%s[1] -> %s(epoch:%d) failed: %w",
+			to[:], xEndsOfEpochName, xCheckEpochCommName, epoch, err)
 	}
 	if len(commObj.Comms) == 0 {
-		return fmt.Errorf("\"target.0x%x.%s[1] -> %s(epoch:%d) got nothing",
-			to[:], xEndsOfEpochName, xCheckEpochCommName, endsEpochObj.Epoch)
+		return nil, fmt.Errorf("\"target.0x%x.%s[1] -> %s(epoch:%d) got nothing",
+			to[:], xEndsOfEpochName, xCheckEpochCommName, epoch)
 	}
-
-	srcComm, err := getSourceCommOfEpoch(ctx.Context, a.src, common.EpochNum(endsEpochObj.Epoch))
-	if err != nil {
-		return fmt.Errorf("src.Committee(epoch:%d) failed: %w", endsEpochObj.Epoch, err)
-	}
-
-	if !committeeEquals(srcComm, commObj.Comms) {
-		return fmt.Errorf("target.0x%x.%s[1]=epoch:%d addrs(%s) not match with %s",
-			to[:], xEndsOfEpochName, endsEpochObj.Epoch, commObj.Comms, srcComm)
-	}
-
-	log.Infof("target.0x%x.%s[1]=epoch:%d\naddrs:%s matchs:%s",
-		to[:], xEndsOfEpochName, endsEpochObj.Epoch, common.IndentLevel(0).InfoString(commObj.Comms), srcComm.InfoString(0))
-	return nil
+	return commObj.Comms, nil
 }
