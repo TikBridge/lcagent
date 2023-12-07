@@ -475,6 +475,7 @@ var (
 
 	_xmaintainFlags = []cli.Flag{
 		_xmaintainTargetLCFlag,
+		_xmaintainSyncStartHeightKeyFlag,
 	}
 
 	_xSyncFlags = []cli.Flag{
