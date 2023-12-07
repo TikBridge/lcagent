@@ -50,8 +50,6 @@ func (a *xmaintainer) prepareConfig(ctx *cli.Context) error {
 	}
 	a.keys.startHeightKey = fmt.Sprintf("%s_start_%d", strings.ToLower(a.Name()), a.conf.SrcChainId)
 	a.keys.runnerLockKey = fmt.Sprintf("%s_lock_%d", strings.ToLower(a.Name()), a.conf.SrcChainId)
-	a.syncStartHeightKey = fmt.Sprintf("xsync_%s_start_%d", a.conf.TargetName, a.conf.SrcChainId)
-	log.Infof("%s, SyncStartHeightKey: %s", a.keys, a.syncStartHeightKey)
 
 	if _, exist := XLightNodeAbi.Events[xUpdateCommEvent]; !exist {
 		return fmt.Errorf("event %s must be exist", xUpdateCommEvent)
@@ -62,10 +60,13 @@ func (a *xmaintainer) prepareConfig(ctx *cli.Context) error {
 		return err
 	}
 	a.conf.XMaintainer.TargetLCAddr = addr
+	a.conf.XMaintainer.XsyncStartHeightKey = ctx.String(_xmaintainSyncStartHeightKeyFlag.Name)
 	if err := a.conf.XMaintainer.validate(); err != nil {
 		return err
 	}
 	models.SysContractLogger.Register(a.conf.Maintainer.TargetLCAddr, LightNodeABI)
+	a.syncStartHeightKey = a.conf.XMaintainer.XsyncStartHeightKey
+	log.Infof("%s, SyncStartHeightKey: %s", a.keys, a.syncStartHeightKey)
 	return nil
 }
 

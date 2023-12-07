@@ -54,7 +54,8 @@ type (
 	}
 
 	XMaintain struct {
-		TargetLCAddr common.Address // address of X-Relay light-client contract in target chain
+		TargetLCAddr        common.Address // address of X-Relay light-client contract in target chain
+		XsyncStartHeightKey string
 	}
 
 	Synchronize struct {
@@ -91,6 +92,9 @@ func (m Maintain) validate() error {
 func (m XMaintain) validate() error {
 	if m.TargetLCAddr == common.EmptyAddress {
 		return errors.New("target light-client contract address is missing")
+	}
+	if m.XsyncStartHeightKey == "" {
+		return errors.New("xsync start height key is missing")
 	}
 	return nil
 }
@@ -379,6 +383,12 @@ var (
 		Name:     "xmaintain.targetlc",
 		Category: XMaintainFlagCategory,
 		Usage:    "the address of X-Relay Light-Client contract on target chain",
+	})
+
+	_xmaintainSyncStartHeightKeyFlag = altsrc.NewStringFlag(&cli.StringFlag{
+		Name:     "xmaintain.xsyncstartheightkey",
+		Category: XMaintainFlagCategory,
+		Usage:    "the redis key of the corresponding xsync start height key",
 	})
 
 	_xSyncChainIDFlag = altsrc.NewUint64Flag(&cli.Uint64Flag{
